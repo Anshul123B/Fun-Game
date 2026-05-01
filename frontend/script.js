@@ -18,7 +18,15 @@ const state = {
   isGameOver: false
 };
 
-const BASE_URL = 'https://your-backend.onrender.com';
+// Determine backend URL: use localhost during local testing, otherwise use production placeholder
+const BASE_URL = (function() {
+  try {
+    if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+  } catch (e) {}
+  return 'https://your-backend.onrender.com';
+})();
 const API_URL = `${BASE_URL}/api/scores`;
 
 // ── DOM References ─────────────────────────
@@ -81,7 +89,10 @@ const audio = {
   correct: document.getElementById('audio-correct'),
   wrong:   document.getElementById('audio-wrong'),
   music:   document.getElementById('audio-music'),
-  easy:    document.getElementById('audio-easy')
+  easy:    document.getElementById('audio-easy'),
+  medium:  document.getElementById('audio-medium'),
+  hard:    document.getElementById('audio-hard'),
+  highscore: document.getElementById('audio-highscore')
 };
 
 // ── Difficulty Ranges & Time ──────────────────────
@@ -370,11 +381,12 @@ function endGame() {
   state.isGameOver = true;
   stopTimer();
   
-  const isNewRecord = state.score > state.highScore;
+  const isNewRecord = state.score > state.highScore && state.score > 0;
 
   if (isNewRecord) {
     state.highScore = state.score;
     saveHighScore(state.highScore);
+    playSound('highscore');
   }
 
   if (state.score === 0) {
@@ -535,6 +547,16 @@ el.diffCards.forEach(card => {
     state.difficulty = card.dataset.diff;
     if (state.difficulty === 'easy') {
       playSound('easy');
+      setTimeout(() => {
+        startGame();
+      }, 1200);
+    } else if (state.difficulty === 'medium') {
+      playSound('medium');
+      setTimeout(() => {
+        startGame();
+      }, 1200);
+    } else if (state.difficulty === 'hard') {
+      playSound('hard');
       setTimeout(() => {
         startGame();
       }, 1200);
