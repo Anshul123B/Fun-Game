@@ -10,7 +10,7 @@ const state = {
   streak: 0,
   highScore: 0,
   questionCount: 0,
-  currentQuestion: null,  // { num1, num2, answer }
+  currentQuestion: null,  // { answer, display }
   musicEnabled: false,
   musicPromptShown: false,
   timeLeft: 10,
@@ -233,41 +233,78 @@ function rand(min, max) {
 
 function generateQuestion() {
   const max = RANGES[state.difficulty];
-  let num1, num2, answer, display;
+  let answer, display;
 
   switch (state.mode) {
     case 'addition':
-      num1 = rand(1, max);
-      num2 = rand(1, max);
-      answer = num1 + num2;
-      display = `${num1} + ${num2} = ?`;
+      if (state.difficulty === 'easy') {
+        const n1 = rand(1, max), n2 = rand(1, max);
+        answer = n1 + n2;
+        display = `${n1} + ${n2} = ?`;
+      } else if (state.difficulty === 'medium') {
+        const n1 = rand(1, max), n2 = rand(1, max), n3 = rand(1, max);
+        answer = n1 + n2 + n3;
+        display = `${n1} + ${n2} + ${n3} = ?`;
+      } else {
+        const n1 = rand(1, max), n2 = rand(1, max), n3 = rand(1, max), n4 = rand(1, max);
+        answer = n1 + n2 + n3 + n4;
+        display = `${n1} + ${n2} + ${n3} + ${n4} = ?`;
+      }
       break;
 
     case 'subtraction':
-      num1 = rand(1, max);
-      num2 = rand(1, num1); // ensure non-negative result
-      answer = num1 - num2;
-      display = `${num1} − ${num2} = ?`;
+      if (state.difficulty === 'easy') {
+        const n1 = rand(1, max), n2 = rand(1, n1);
+        answer = n1 - n2;
+        display = `${n1} − ${n2} = ?`;
+      } else if (state.difficulty === 'medium') {
+        const n1 = rand(max, Math.floor(max * 1.5)), n2 = rand(1, Math.floor(n1/2)), n3 = rand(1, Math.floor((n1-n2)/2));
+        answer = n1 - n2 - n3;
+        display = `${n1} − ${n2} − ${n3} = ?`;
+      } else {
+        const n1 = rand(max, max * 2), n2 = rand(1, Math.floor(n1/3)), n3 = rand(1, Math.floor(n1/3)), n4 = rand(1, Math.floor(n1/3));
+        answer = n1 - n2 - n3 - n4;
+        display = `${n1} − ${n2} − ${n3} − ${n4} = ?`;
+      }
       break;
 
     case 'multiplication':
-      num1 = rand(1, Math.min(max, 20));
-      num2 = rand(1, Math.min(max, 20));
-      answer = num1 * num2;
-      display = `${num1} × ${num2} = ?`;
+      if (state.difficulty === 'easy') {
+        const n1 = rand(1, 10), n2 = rand(1, 10);
+        answer = n1 * n2;
+        display = `${n1} × ${n2} = ?`;
+      } else if (state.difficulty === 'medium') {
+        const n1 = rand(2, 10), n2 = rand(2, 10), n3 = rand(2, 10);
+        answer = n1 * n2 * n3;
+        display = `${n1} × ${n2} × ${n3} = ?`;
+      } else {
+        const n1 = rand(5, 12), n2 = rand(5, 12), n3 = rand(2, 10), n4 = rand(2, 5);
+        answer = n1 * n2 * n3 * n4;
+        display = `${n1} × ${n2} × ${n3} × ${n4} = ?`;
+      }
       break;
 
     case 'division': {
-      num2 = rand(1, Math.min(max, 20));          // divisor
-      const quotient = rand(1, Math.min(max, 20)); // result
-      num1 = num2 * quotient;                       // dividend
-      answer = quotient;
-      display = `${num1} ÷ ${num2} = ?`;
+      if (state.difficulty === 'easy') {
+        const n2 = rand(1, 10), q = rand(1, 10);
+        const n1 = n2 * q; answer = q;
+        display = `${n1} ÷ ${n2} = ?`;
+      } else if (state.difficulty === 'medium') {
+        const q = rand(2, 10), n3 = rand(2, 5), n2 = rand(2, 5);
+        const n1 = q * n2 * n3;
+        answer = q;
+        display = `${n1} ÷ ${n2} ÷ ${n3} = ?`;
+      } else {
+        const q = rand(2, 20), n3 = rand(2, 10), n2 = rand(2, 10);
+        const n1 = q * n2 * n3;
+        answer = q;
+        display = `${n1} ÷ ${n2} ÷ ${n3} = ?`;
+      }
       break;
     }
   }
 
-  state.currentQuestion = { num1, num2, answer, display };
+  state.currentQuestion = { answer, display };
 }
 
 function generateOptions(correctAnswer) {
