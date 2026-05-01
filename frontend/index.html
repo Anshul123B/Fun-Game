@@ -11,6 +11,8 @@
 </head>
 <body>
 
+  <div id="flash-overlay" class="flash-overlay"></div>
+
   <!-- ══════════════ LANDING SCREEN ══════════════ -->
   <section id="landing-screen" class="screen active">
     <div class="stars" id="stars"></div>
@@ -34,10 +36,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M8 5v14l11-7z"/></svg>
       </button>
 
-      <!-- Floating music toggle (always visible after prompt) -->
-      <button id="btn-music-toggle" class="music-fab" title="Toggle Music" style="display:none;">
-        🎵
-      </button>
+      <button id="btn-music-toggle" class="music-fab" title="Toggle Sound" style="display:none;">🎵</button>
     </div>
   </section>
 
@@ -72,23 +71,23 @@
   <section id="difficulty-screen" class="screen">
     <div class="screen-header">
       <h2 class="screen-title">Choose Difficulty</h2>
-      <p class="screen-sub" id="diff-sub-label">Pick your challenge level</p>
+      <p class="screen-sub" id="diff-sub-label">Pick your base challenge level</p>
     </div>
     <div class="diff-grid">
       <button class="diff-card easy" id="diff-easy" data-diff="easy">
         <span class="diff-icon">🌱</span>
         <span class="diff-name">Easy</span>
-        <span class="diff-range">Numbers 1–10</span>
+        <span class="diff-range">Starts Simple</span>
       </button>
       <button class="diff-card medium" id="diff-medium" data-diff="medium">
         <span class="diff-icon">🔥</span>
         <span class="diff-name">Medium</span>
-        <span class="diff-range">Numbers 1–50</span>
+        <span class="diff-range">Starts Challenging</span>
       </button>
       <button class="diff-card hard" id="diff-hard" data-diff="hard">
         <span class="diff-icon">💀</span>
         <span class="diff-name">Hard</span>
-        <span class="diff-range">Numbers 1–100</span>
+        <span class="diff-range">Starts Brutal</span>
       </button>
     </div>
     <button id="btn-back-to-mode" class="btn btn-ghost back-btn">← Back</button>
@@ -103,7 +102,7 @@
       </div>
       <div class="hud-item hud-center">
         <span class="mode-badge" id="mode-badge">Addition</span>
-        <span class="hud-label" style="margin-top:5px;">Streak: <span id="current-streak">0</span></span>
+        <span class="hud-label" style="margin-top:5px; font-weight:bold; color: #f59e0b;" id="current-streak">0</span>
       </div>
       <div class="hud-item">
         <span class="hud-label">Time</span>
@@ -111,8 +110,8 @@
       </div>
     </div>
     
-    <div class="timer-bar-container" style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; margin-bottom:15px; overflow:hidden;">
-      <div id="timer-bar" style="width:100%; height:100%; background:var(--primary); transition:width 1s linear;"></div>
+    <div class="timer-bar-container">
+      <div id="timer-bar"></div>
     </div>
 
     <div class="question-card" id="question-card">
@@ -127,36 +126,51 @@
       <button class="answer-btn" id="ans-3"></button>
     </div>
 
-    <!-- Floating music toggle in-game -->
-    <button id="btn-music-toggle-game" class="music-fab" title="Toggle Music">🎵</button>
+    <button id="btn-music-toggle-game" class="music-fab" title="Toggle Sound">🔊</button>
   </section>
 
   <!-- ══════════════ GAME OVER SCREEN ══════════════ -->
-  <section id="gameover-screen" class="screen" style="overflow-y: auto;">
+  <section id="gameover-screen" class="screen">
     <div class="gameover-content">
-      <div class="gameover-emoji" id="gameover-emoji">😵</div>
       <h2 class="gameover-title" id="gameover-title">Game Over!</h2>
-      <p class="gameover-msg" id="gameover-msg">Better luck next time!</p>
 
       <div class="score-panel">
-        <div class="score-row">
+        <div class="score-row highlight">
           <span>Your Score</span>
           <span class="score-val" id="final-score">0</span>
         </div>
-        <div class="score-row highlight">
+        <div class="score-row">
           <span>🏆 High Score</span>
           <span class="score-val" id="final-high-score">0</span>
         </div>
-        <p class="new-record-badge" id="new-record-badge" style="display:none;">🎉 New Record!</p>
       </div>
       
-      <div id="leaderboard" class="leaderboard-section" style="margin-top: 20px; text-align:left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px;">
-        <h3 style="margin-bottom: 10px; color: #fff; text-align: center;">Your Top Scores</h3>
-        <ul id="leaderboard-list" style="list-style:none; padding:0; margin:0; max-height:150px; overflow-y:auto; font-size:1.1rem; text-align: center;">
+      <div class="analytics-grid">
+        <div class="analytics-item">
+          <span class="analytics-label">Accuracy</span>
+          <span class="analytics-val" id="accuracy-stat">0%</span>
+        </div>
+        <div class="analytics-item">
+          <span class="analytics-label">Questions</span>
+          <span class="analytics-val" id="questions-stat">0</span>
+        </div>
+        <div class="analytics-item">
+          <span class="analytics-label">Best Streak</span>
+          <span class="analytics-val" id="best-streak-stat">0</span>
+        </div>
+        <div class="analytics-item">
+          <span class="analytics-label">Avg Time</span>
+          <span class="analytics-val" id="avg-time-stat">0s</span>
+        </div>
+      </div>
+      
+      <div class="leaderboard-section">        
+        <h3>Top Scores</h3>
+        <ul id="leaderboard-list">
         </ul>
       </div>
 
-      <div class="gameover-btns" style="margin-top: 20px;">
+      <div class="gameover-btns">
         <button id="btn-play-again" class="btn btn-glow">Play Again</button>
         <button id="btn-main-menu" class="btn btn-ghost">Main Menu</button>
       </div>
@@ -173,6 +187,9 @@
   <audio id="audio-highscore" src="./sounds/anime-ahh.mp3" preload="auto"></audio>
   <audio id="audio-skip"    src="./sounds/itna-chubne-laga-hu-sabko.mp3" preload="auto"></audio>
 
-  <script src="script.js"></script>
+  <script src="storage.js"></script>
+  <script src="sound.js"></script>
+  <script src="ui.js"></script>
+  <script src="gameLogic.js"></script>
 </body>
 </html>
