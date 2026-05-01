@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MathBlitz – A fun browser-based math quiz game with multiple modes and difficulties." />
+  <title>MathBlitz – Math Quiz Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══════════════ LANDING SCREEN ══════════════ -->
+  <section id="landing-screen" class="screen active">
+    <div class="stars" id="stars"></div>
+    <div class="landing-content">
+      <div class="logo-wrap">
+        <span class="logo-icon">🧮</span>
+        <h1 class="logo-text">Math<span>Blitz</span></h1>
+      </div>
+      <p class="tagline">Test your math skills under pressure!</p>
+
+      <div class="music-prompt-card" id="music-prompt-card">
+        <p class="music-prompt-text">🎵 Would you like background music?</p>
+        <div class="music-prompt-btns">
+          <button id="btn-music-yes" class="btn btn-glow">Yes, play it!</button>
+          <button id="btn-music-no" class="btn btn-ghost">Skip</button>
+        </div>
+      </div>
+
+      <button id="btn-start" class="btn btn-start" style="display:none;">
+        <span>Start Game</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+
+      <!-- Floating music toggle (always visible after prompt) -->
+      <button id="btn-music-toggle" class="music-fab" title="Toggle Music" style="display:none;">
+        🎵
+      </button>
+    </div>
+  </section>
+
+  <!-- ══════════════ MODE SELECTION ══════════════ -->
+  <section id="mode-screen" class="screen">
+    <div class="screen-header">
+      <h2 class="screen-title">Choose Mode</h2>
+      <p class="screen-sub">What kind of math will you face?</p>
+    </div>
+    <div class="card-grid">
+      <button class="mode-card" id="mode-addition" data-mode="addition">
+        <span class="card-icon">➕</span>
+        <span class="card-label">Addition</span>
+      </button>
+      <button class="mode-card" id="mode-subtraction" data-mode="subtraction">
+        <span class="card-icon">➖</span>
+        <span class="card-label">Subtraction</span>
+      </button>
+      <button class="mode-card" id="mode-multiplication" data-mode="multiplication">
+        <span class="card-icon">✖️</span>
+        <span class="card-label">Multiplication</span>
+      </button>
+      <button class="mode-card" id="mode-division" data-mode="division">
+        <span class="card-icon">➗</span>
+        <span class="card-label">Division</span>
+      </button>
+    </div>
+    <button id="btn-back-to-landing" class="btn btn-ghost back-btn">← Back</button>
+  </section>
+
+  <!-- ══════════════ DIFFICULTY SELECTION ══════════════ -->
+  <section id="difficulty-screen" class="screen">
+    <div class="screen-header">
+      <h2 class="screen-title">Choose Difficulty</h2>
+      <p class="screen-sub" id="diff-sub-label">Pick your challenge level</p>
+    </div>
+    <div class="diff-grid">
+      <button class="diff-card easy" id="diff-easy" data-diff="easy">
+        <span class="diff-icon">🌱</span>
+        <span class="diff-name">Easy</span>
+        <span class="diff-range">Numbers 1–10</span>
+      </button>
+      <button class="diff-card medium" id="diff-medium" data-diff="medium">
+        <span class="diff-icon">🔥</span>
+        <span class="diff-name">Medium</span>
+        <span class="diff-range">Numbers 1–50</span>
+      </button>
+      <button class="diff-card hard" id="diff-hard" data-diff="hard">
+        <span class="diff-icon">💀</span>
+        <span class="diff-name">Hard</span>
+        <span class="diff-range">Numbers 1–100</span>
+      </button>
+    </div>
+    <button id="btn-back-to-mode" class="btn btn-ghost back-btn">← Back</button>
+  </section>
+
+  <!-- ══════════════ GAME SCREEN ══════════════ -->
+  <section id="game-screen" class="screen">
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Score</span>
+        <span class="hud-value" id="current-score">0</span>
+      </div>
+      <div class="hud-item hud-center">
+        <span class="mode-badge" id="mode-badge">Addition</span>
+        <span class="hud-label" style="margin-top:5px;">Streak: <span id="current-streak">0</span></span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Time</span>
+        <span class="hud-value" id="time-left">10</span>
+      </div>
+    </div>
+    
+    <div class="timer-bar-container" style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; margin-bottom:15px; overflow:hidden;">
+      <div id="timer-bar" style="width:100%; height:100%; background:var(--primary); transition:width 1s linear;"></div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <p class="question-num" id="question-num">Question 1</p>
+      <h2 class="question-text" id="question-text">? + ? = ?</h2>
+    </div>
+
+    <div class="answers-grid" id="answers-grid">
+      <button class="answer-btn" id="ans-0"></button>
+      <button class="answer-btn" id="ans-1"></button>
+      <button class="answer-btn" id="ans-2"></button>
+      <button class="answer-btn" id="ans-3"></button>
+    </div>
+
+    <!-- Floating music toggle in-game -->
+    <button id="btn-music-toggle-game" class="music-fab" title="Toggle Music">🎵</button>
+  </section>
+
+  <!-- ══════════════ GAME OVER SCREEN ══════════════ -->
+  <section id="gameover-screen" class="screen" style="overflow-y: auto;">
+    <div class="gameover-content">
+      <div class="gameover-emoji" id="gameover-emoji">😵</div>
+      <h2 class="gameover-title" id="gameover-title">Game Over!</h2>
+      <p class="gameover-msg" id="gameover-msg">Better luck next time!</p>
+
+      <div class="score-panel">
+        <div class="score-row">
+          <span>Your Score</span>
+          <span class="score-val" id="final-score">0</span>
+        </div>
+        <div class="score-row highlight">
+          <span>🏆 High Score</span>
+          <span class="score-val" id="final-high-score">0</span>
+        </div>
+        <p class="new-record-badge" id="new-record-badge" style="display:none;">🎉 New Record!</p>
+      </div>
+      
+      <div class="leaderboard-section" style="margin-top: 20px; text-align:left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px;">
+        <h3 style="margin-bottom: 10px; color: #fff;">Submit Score</h3>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <input type="text" id="player-name" placeholder="Enter your name" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.1); color:#fff; font-family:inherit;" />
+          <button id="btn-submit-score" class="btn btn-glow" style="padding:10px 20px; font-size:1rem;">Submit</button>
+        </div>
+        
+        <h3 style="margin-bottom: 10px; color: #fff; display:flex; justify-content:space-between; align-items:center;">
+          Leaderboard <span id="leaderboard-loading" style="font-size:0.8rem; font-weight:normal; opacity:0.7;">Loading...</span>
+        </h3>
+        <ul id="leaderboard-list" style="list-style:none; padding:0; margin:0; max-height:150px; overflow-y:auto; font-size:0.9rem;">
+        </ul>
+      </div>
+
+      <div class="gameover-btns" style="margin-top: 20px;">
+        <button id="btn-play-again" class="btn btn-glow">Play Again</button>
+        <button id="btn-main-menu" class="btn btn-ghost">Main Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Audio elements -->
+  <audio id="audio-correct" src="./sounds/ack.mp3" preload="auto"></audio>
+  <audio id="audio-wrong"   src="./sounds/rizzbot-laugh.mp3" preload="auto"></audio>
+  <audio id="audio-music"   src="./sounds/game music.mp3" preload="auto" loop></audio>
+  <audio id="audio-easy"    src="./sounds/jo-gareeb-hove-naa.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
