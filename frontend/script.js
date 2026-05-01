@@ -436,7 +436,7 @@ function endGame() {
   el.newRecordBadge.style.display = isNewRecord ? 'inline-block' : 'none';
   
   saveScore(state.score);
-  displayLeaderboard();
+  renderLeaderboard();
 
   showScreen('gameover');
 }
@@ -445,7 +445,7 @@ function endGame() {
    LOCAL LEADERBOARD
 ══════════════════════════════════════════ */
 function getLeaderboard() {
-  const scoresStr = localStorage.getItem('scores');
+  const scoresStr = localStorage.getItem('mathblitz_scores');
   if (!scoresStr) return [];
   try {
     return JSON.parse(scoresStr);
@@ -455,58 +455,46 @@ function getLeaderboard() {
 }
 
 function saveScore(score) {
-  if (score === 0) return; // Don't save zero scores
+  if (score <= 0) return;
+
+  let scores = getLeaderboard();
   
-  const scores = getLeaderboard();
-  
-  // Format with date
-  const newScore = {
-    score,
-    date: new Date().toISOString()
+  const newEntry = {
+    score: score,
+    date: new Date().toISOString().replace('T', ' ').substring(0, 16)
   };
   
-  scores.push(newScore);
-  
-  // Sort descending and keep top 5
+  scores.push(newEntry);
   scores.sort((a, b) => b.score - a.score);
-  const topScores = scores.slice(0, 5);
+  scores = scores.slice(0, 5);
   
-  localStorage.setItem('scores', JSON.stringify(topScores));
+  localStorage.setItem('mathblitz_scores', JSON.stringify(scores));
 }
 
-function displayLeaderboard() {
+function renderLeaderboard() {
   const scores = getLeaderboard();
   el.leaderboardList.innerHTML = '';
-  
   if (scores.length === 0) {
     el.leaderboardList.innerHTML = '<li style="padding:5px 0; color:rgba(255,255,255,0.5);">No scores yet!</li>';
     return;
   }
   
-  scores.forEach((scoreObj, index) => {
+  scores.forEach((entry, index) => {
     const li = document.createElement('li');
     li.style.padding = '8px 0';
     li.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
     li.style.display = 'flex';
     li.style.justifyContent = 'space-between';
-    li.style.alignItems = 'center';
     
     let icon = '';
-    if (index === 0) icon = '🥇';
-    else if (index === 1) icon = '🥈';
-    else if (index === 2) icon = '🥉';
-    else icon = `<span style="display:inline-block; width:20px; text-align:center;">${index + 1}.</span>`;
-    
-    // Format date beautifully
-    const d = new Date(scoreObj.date);
-    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (index === 0) icon = '🥇 ';
+    else if (index === 1) icon = '🥈 ';
+    else if (index === 2) icon = '🥉 ';
+    else icon = `${index + 1}. `;
     
     li.innerHTML = `
-      <span style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:1.2rem;">${icon}</span>
-        <span style="opacity:0.6;font-size:0.75rem">${dateStr}</span>
-      </span>
-      <span style="color:var(--primary); font-weight:bold; font-size:1.1rem;">${scoreObj.score} pts</span>
+      <span>${icon} <span style="opacity:0.6;font-size:0.8rem">(${entry.date})</span></span>
+      <span style="color:var(--primary); font-weight:bold;">${entry.score} pts</span>
     `;
     el.leaderboardList.appendChild(li);
   });
@@ -597,8 +585,6 @@ el.btnMainMenu.addEventListener('click', () => {
   el.btnStart.style.display = 'flex';
   el.btnMusicToggle.style.display = 'flex';
 });
-
-
 
 /* ══════════════════════════════════════════
    INIT
