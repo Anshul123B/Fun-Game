@@ -18,8 +18,6 @@ const state = {
   isGameOver: false
 };
 
-const BASE_URL = "https://fun-game-1vzj.onrender.com/api/scores";
-
 // ── DOM References ─────────────────────────
 const screens = {
   landing:    document.getElementById('landing-screen'),
@@ -69,10 +67,7 @@ const el = {
   btnMainMenu:      document.getElementById('btn-main-menu'),
   
   // Leaderboard
-  playerNameInput:  document.getElementById('player-name'),
-  btnSubmitScore:   document.getElementById('btn-submit-score'),
-  leaderboardList:  document.getElementById('leaderboard-list'),
-  leaderboardLoading: document.getElementById('leaderboard-loading')
+  leaderboardList:  document.getElementById('leaderboard-list')
 };
 
 // ── Audio ──────────────────────────────────
@@ -440,35 +435,49 @@ function endGame() {
   el.finalHighScore.textContent = state.highScore;
   el.newRecordBadge.style.display = isNewRecord ? 'inline-block' : 'none';
   
-  // Reset UI for leaderboard
-  el.playerNameInput.value = '';
-  el.playerNameInput.disabled = false;
-  el.btnSubmitScore.disabled = false;
-  el.btnSubmitScore.textContent = 'Submit';
-  fetchLeaderboard();
+  saveScore(state.score);
+  displayLeaderboard();
 
   showScreen('gameover');
 }
 
 /* ══════════════════════════════════════════
-   LEADERBOARD API
+   LOCAL LEADERBOARD
 ══════════════════════════════════════════ */
-async function fetchLeaderboard() {
-  el.leaderboardLoading.textContent = 'Loading...';
+function getLeaderboard() {
+  const scoresStr = localStorage.getItem('scores');
+  if (!scoresStr) return [];
   try {
-    const res = await fetch(BASE_URL);
-    if (!res.ok) throw new Error('Failed to fetch');
-    const data = await res.json();
-    renderLeaderboard(data);
-    el.leaderboardLoading.textContent = '';
-  } catch (error) {
-    el.leaderboardLoading.textContent = 'Failed to load';
-    console.error(error);
+    return JSON.parse(scoresStr);
+  } catch (e) {
+    return [];
   }
 }
 
-function renderLeaderboard(scores) {
+function saveScore(score) {
+  if (score === 0) return; // Don't save zero scores
+  
+  const scores = getLeaderboard();
+  
+  // Format with date
+  const newScore = {
+    score,
+    date: new Date().toISOString()
+  };
+  
+  scores.push(newScore);
+  
+  // Sort descending and keep top 5
+  scores.sort((a, b) => b.score - a.score);
+  const topScores = scores.slice(0, 5);
+  
+  localStorage.setItem('scores', JSON.stringify(topScores));
+}
+
+function displayLeaderboard() {
+  const scores = getLeaderboard();
   el.leaderboardList.innerHTML = '';
+  
   if (scores.length === 0) {
     el.leaderboardList.innerHTML = '<li style="padding:5px 0; color:rgba(255,255,255,0.5);">No scores yet!</li>';
     return;
@@ -480,53 +489,27 @@ function renderLeaderboard(scores) {
     li.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
     li.style.display = 'flex';
     li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
     
-    // Highlight top 3
     let icon = '';
-    if (index === 0) icon = '🥇 ';
-    else if (index === 1) icon = '🥈 ';
-    else if (index === 2) icon = '🥉 ';
+    if (index === 0) icon = '🥇';
+    else if (index === 1) icon = '🥈';
+    else if (index === 2) icon = '🥉';
+    else icon = `<span style="display:inline-block; width:20px; text-align:center;">${index + 1}.</span>`;
+    
+    // Format date beautifully
+    const d = new Date(scoreObj.date);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     li.innerHTML = `
-      <span>${icon}<strong>${scoreObj.name}</strong> <span style="opacity:0.6;font-size:0.8rem">(${scoreObj.difficulty})</span></span>
-      <span style="color:var(--primary); font-weight:bold;">${scoreObj.score} pts</span>
+      <span style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.2rem;">${icon}</span>
+        <span style="opacity:0.6;font-size:0.75rem">${dateStr}</span>
+      </span>
+      <span style="color:var(--primary); font-weight:bold; font-size:1.1rem;">${scoreObj.score} pts</span>
     `;
     el.leaderboardList.appendChild(li);
   });
-}
-
-async function submitScore() {
-  const name = el.playerNameInput.value.trim();
-  if (!name) return alert('Please enter your name!');
-  
-  el.btnSubmitScore.disabled = true;
-  el.playerNameInput.disabled = true;
-  el.btnSubmitScore.textContent = 'Saving...';
-  
-  try {
-    const res = await fetch(BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        score: state.score,
-        mode: state.mode,
-        difficulty: state.difficulty
-      })
-    });
-    
-    if (res.ok) {
-      el.btnSubmitScore.textContent = 'Saved!';
-      fetchLeaderboard();
-    } else {
-      throw new Error('Failed to save');
-    }
-  } catch (error) {
-    console.error(error);
-    el.btnSubmitScore.disabled = false;
-    el.playerNameInput.disabled = false;
-    el.btnSubmitScore.textContent = 'Try Again';
-  }
 }
 
 /* ══════════════════════════════════════════
@@ -615,7 +598,7 @@ el.btnMainMenu.addEventListener('click', () => {
   el.btnMusicToggle.style.display = 'flex';
 });
 
-el.btnSubmitScore.addEventListener('click', submitScore);
+
 
 /* ══════════════════════════════════════════
    INIT
