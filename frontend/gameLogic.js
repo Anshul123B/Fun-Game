@@ -250,10 +250,8 @@ const Game = {
         let points = 10 + (this.state.currentDifficultyLevel * 2);
         if (this.state.streak >= 3) {
             points += 5 * (this.state.streak - 2);
-            Sound.streakBonus();
-        } else {
-            Sound.correct();
         }
+        Sound.correct();
         
         this.state.score += points;
         
@@ -283,7 +281,6 @@ const Game = {
     endGame: function() {
         this.state.isGameOver = true;
         clearInterval(this.state.timerInterval);
-        Sound.gameOver();
         
         const accuracy = this.state.totalQuestions > 0 
             ? Math.round((this.state.correctAnswers / this.state.totalQuestions) * 100) 
@@ -313,6 +310,8 @@ const Game = {
         
         if (this.state.score > 0 && this.state.score >= highScore) {
             Sound.highScore();
+        } else {
+            Sound.gameOver();
         }
         
         UI.showAnalytics(stats, leaderboard, scoreObj);

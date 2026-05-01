@@ -44,8 +44,7 @@ const Sound = {
         this.playFile('highscore');
     },
     gameOver: function() {
-        // You can customize this or keep it as wrong
-        this.playFile('wrong');
+        this.playFile('skip');
     },
     playDifficultySound: function(diff) {
         this.playFile(diff);
