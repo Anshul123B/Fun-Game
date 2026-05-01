@@ -92,7 +92,8 @@ const audio = {
   easy:    document.getElementById('audio-easy'),
   medium:  document.getElementById('audio-medium'),
   hard:    document.getElementById('audio-hard'),
-  highscore: document.getElementById('audio-highscore')
+  highscore: document.getElementById('audio-highscore'),
+  skip:    document.getElementById('audio-skip')
 };
 
 // ── Difficulty Ranges & Time ──────────────────────
@@ -513,6 +514,7 @@ el.btnMusicYes.addEventListener('click', () => {
 });
 
 el.btnMusicNo.addEventListener('click', () => {
+  playSound('skip');
   state.musicEnabled = false;
   revealStartButton();
 });
