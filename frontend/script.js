@@ -435,8 +435,10 @@ function endGame() {
   el.finalHighScore.textContent = state.highScore;
   el.newRecordBadge.style.display = isNewRecord ? 'inline-block' : 'none';
   
-  saveScore(state.score);
-  renderLeaderboard();
+  if (state.score > 0) {
+    saveScore(state.score);
+  }
+  renderLeaderboard(getLeaderboard());
 
   showScreen('gameover');
 }
@@ -445,7 +447,7 @@ function endGame() {
    LOCAL LEADERBOARD
 ══════════════════════════════════════════ */
 function getLeaderboard() {
-  const scoresStr = localStorage.getItem('mathblitz_scores');
+  const scoresStr = localStorage.getItem('scores');
   if (!scoresStr) return [];
   try {
     return JSON.parse(scoresStr);
@@ -455,46 +457,47 @@ function getLeaderboard() {
 }
 
 function saveScore(score) {
-  if (score <= 0) return;
-
   let scores = getLeaderboard();
   
-  const newEntry = {
-    score: score,
-    date: new Date().toISOString().replace('T', ' ').substring(0, 16)
-  };
+  // Format based on requirement: array of objects { score, date }
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 16).replace('T', ' '); // e.g. "2026-05-01 10:30"
   
-  scores.push(newEntry);
+  scores.push({ score, date: dateStr });
+  
+  // Sort descending by score
   scores.sort((a, b) => b.score - a.score);
+  
+  // Keep top 5
   scores = scores.slice(0, 5);
   
-  localStorage.setItem('mathblitz_scores', JSON.stringify(scores));
+  localStorage.setItem('scores', JSON.stringify(scores));
 }
 
-function renderLeaderboard() {
-  const scores = getLeaderboard();
+function renderLeaderboard(scores) {
   el.leaderboardList.innerHTML = '';
   if (scores.length === 0) {
     el.leaderboardList.innerHTML = '<li style="padding:5px 0; color:rgba(255,255,255,0.5);">No scores yet!</li>';
     return;
   }
   
-  scores.forEach((entry, index) => {
+  scores.forEach((scoreObj, index) => {
     const li = document.createElement('li');
     li.style.padding = '8px 0';
     li.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
     li.style.display = 'flex';
     li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
     
-    let icon = '';
+    // Highlight top 3
+    let icon = `${index + 1}. `;
     if (index === 0) icon = '🥇 ';
     else if (index === 1) icon = '🥈 ';
     else if (index === 2) icon = '🥉 ';
-    else icon = `${index + 1}. `;
     
     li.innerHTML = `
-      <span>${icon} <span style="opacity:0.6;font-size:0.8rem">(${entry.date})</span></span>
-      <span style="color:var(--primary); font-weight:bold;">${entry.score} pts</span>
+      <span style="font-weight:bold;">${icon}<span style="opacity:0.6;font-size:0.8rem;font-weight:normal;">(${scoreObj.date})</span></span>
+      <span style="color:var(--primary); font-weight:bold; font-size:1.2rem;">${scoreObj.score}</span>
     `;
     el.leaderboardList.appendChild(li);
   });
@@ -585,6 +588,8 @@ el.btnMainMenu.addEventListener('click', () => {
   el.btnStart.style.display = 'flex';
   el.btnMusicToggle.style.display = 'flex';
 });
+
+el.btnSubmitScore.addEventListener('click', submitScore);
 
 /* ══════════════════════════════════════════
    INIT
