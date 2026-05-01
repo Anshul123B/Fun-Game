@@ -18,16 +18,7 @@ const state = {
   isGameOver: false
 };
 
-// Determine backend URL: use localhost during local testing, otherwise use production placeholder
-const BASE_URL = (function() {
-  try {
-    if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000';
-    }
-  } catch (e) {}
-  return 'https://your-backend.onrender.com';
-})();
-const API_URL = `${BASE_URL}/api/scores`;
+const BASE_URL = "https://fun-game-1vzj.onrender.com/api/scores";
 
 // ── DOM References ─────────────────────────
 const screens = {
@@ -465,7 +456,7 @@ function endGame() {
 async function fetchLeaderboard() {
   el.leaderboardLoading.textContent = 'Loading...';
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(BASE_URL);
     if (!res.ok) throw new Error('Failed to fetch');
     const data = await res.json();
     renderLeaderboard(data);
@@ -513,7 +504,7 @@ async function submitScore() {
   el.btnSubmitScore.textContent = 'Saving...';
   
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
